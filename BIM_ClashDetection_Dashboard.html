@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIM Analytics — Clash Detection Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0a0c0f;--bg1:#111318;--bg2:#181c22;--bg3:#1e232b;--bg4:#252c36;
+  --teal:#00d4aa;--teal2:#00b894;--teal3:#00796b;
+  --amber:#f39c12;--red:#e74c3c;--blue:#3498db;--purple:#9b59b6;--green:#2ecc71;--orange:#e67e22;
+  --text1:#f0f4f8;--text2:#8a9ab5;--text3:#4a566a;
+  --border:#1e2530;
+}
+body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--text1);min-height:100vh;}
+/* TOP BAR */
+.topbar{background:var(--bg1);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+.logo{font-size:14px;font-weight:800;letter-spacing:.14em;color:var(--teal);text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+.logo-pulse{width:10px;height:10px;background:var(--teal);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,.4)}50%{box-shadow:0 0 0 6px rgba(0,212,170,0)}}
+.topbar-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.tag{font-size:11px;color:var(--text2);background:var(--bg3);padding:5px 12px;border-radius:4px;border:1px solid var(--border);}
+.tag-warn{background:rgba(243,156,18,.12);color:#f39c12;border-color:rgba(243,156,18,.3);}
+/* FILTERS */
+.filters{padding:12px 28px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.fl{font-size:10px;color:var(--text3);margin-right:2px;text-transform:uppercase;letter-spacing:.1em;}
+.fbtn{font-size:11px;padding:5px 13px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;}
+.fbtn.on{background:var(--teal);color:#000;border-color:var(--teal);font-weight:700;}
+.fbtn:hover:not(.on){border-color:var(--teal3);color:var(--text1);}
+.vsep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+/* KPI GRID */
+.kpi-row{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--border);}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:600px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+.kpi{background:var(--bg1);padding:18px 20px;position:relative;overflow:hidden;transition:background .2s;}
+.kpi:hover{background:var(--bg2);}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--kc,var(--teal));}
+.kpi-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.kpi-val{font-size:28px;font-weight:700;color:var(--text1);line-height:1;font-family:'DM Mono',monospace;}
+.kpi-sub{font-size:11px;margin-top:6px;color:var(--text2);}
+.up{color:var(--green);}
+.dn{color:var(--red);}
+/* BODY GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 28px;}
+.grid1{display:grid;grid-template-columns:1fr;gap:16px;padding:0 28px 16px;}
+.grid3{display:grid;grid-template-columns:2fr 1fr;gap:16px;padding:0 28px 16px;}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+/* CARDS */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.ch{padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.ct{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text1);}
+.cs{font-size:10px;color:var(--text3);margin-top:2px;}
+.cb{padding:16px 18px;}
+.ci{font-size:11px;color:var(--text2);padding:10px 18px 14px;border-top:1px solid var(--border);background:var(--bg2);line-height:1.6;}
+.ci b{color:var(--teal);}
+/* BADGES */
+.badge{font-size:10px;padding:3px 9px;border-radius:3px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;}
+.b-red{background:rgba(231,76,60,.15);color:#e74c3c;}
+.b-amber{background:rgba(243,156,18,.15);color:#f39c12;}
+.b-green{background:rgba(46,204,113,.15);color:#2ecc71;}
+.b-teal{background:rgba(0,212,170,.15);color:var(--teal);}
+.b-blue{background:rgba(52,152,219,.15);color:#3498db;}
+.b-purple{background:rgba(155,89,182,.15);color:#9b59b6;}
+/* BAR ROWS */
+.brow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.brow:last-child{border-bottom:none;}
+.blbl{font-size:12px;color:var(--text1);flex:0 0 90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btrack{flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;transition:width .6s ease;}
+.bval{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);min-width:32px;text-align:right;}
+/* STATUS GRID */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.si{background:var(--bg2);border-radius:6px;padding:12px;border:1px solid var(--border);}
+.sn{font-size:24px;font-weight:700;font-family:'DM Mono',monospace;}
+.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+/* MATRIX */
+.mtx-wrap{overflow-x:auto;}
+.mtx{border-collapse:collapse;width:100%;font-size:10px;}
+.mtx th{background:var(--bg2);color:var(--text2);padding:7px 10px;text-align:center;border:1px solid var(--border);font-weight:600;white-space:nowrap;}
+.mtx td{padding:7px 10px;text-align:center;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;transition:background .2s;}
+.h0{background:#0a0c0f;color:var(--text3);}
+.h1{background:rgba(0,121,107,.18);color:#4db6ac;}
+.h2{background:rgba(0,121,107,.36);color:#80cbc4;}
+.h3{background:rgba(243,156,18,.28);color:#f39c12;}
+.h4{background:rgba(231,76,60,.28);color:#e74c3c;}
+.h5{background:rgba(231,76,60,.58);color:#ff6b6b;font-weight:700;}
+/* AGING */
+.ar{display:grid;grid-template-columns:82px 1fr 38px;gap:8px;align-items:center;margin-bottom:11px;}
+.al{font-size:11px;color:var(--text2);}
+.atr{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.af{height:100%;border-radius:4px;}
+.an{font-size:11px;font-family:'DM Mono',monospace;text-align:right;color:var(--text2);}
+/* PARETO */
+.pr{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.pr:last-child{border-bottom:none;}
+.prk{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;min-width:18px;}
+.prn{font-size:11px;color:var(--text1);flex:1;}
+.prt{flex:1.5;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prf{height:100%;border-radius:3px;background:var(--teal);}
+.prp{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);min-width:34px;text-align:right;}
+/* SECTION DIVIDER */
+.sdiv{padding:8px 28px;background:var(--bg0);border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;gap:10px;}
+.sdiv::after{content:'';flex:1;height:1px;background:var(--border);}
+/* FOOTER */
+footer{padding:16px 28px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:8px;}
+footer a{color:var(--teal);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span class="logo-pulse"></span>BIM Analytics — Clash Detection</div>
+  <div class="topbar-meta">
+    <span class="tag">Residencial Alto Padrão · Torre A + B · São Paulo</span>
+    <span class="tag">Jan 2024 – Jun 2024</span>
+    <span class="tag tag-warn">Em Andamento</span>
+  </div>
+</div>
+
+<div class="filters">
+  <span class="fl">Período</span>
+  <button class="fbtn on" onclick="fp('all',this)">Tudo</button>
+  <button class="fbtn" onclick="fp('6m',this)">6 Meses</button>
+  <button class="fbtn" onclick="fp('3m',this)">3 Meses</button>
+  <button class="fbtn" onclick="fp('1m',this)">1 Mês</button>
+  <div class="vsep"></div>
+  <span class="fl">Disciplina</span>
+  <button class="fbtn on" onclick="fd('all',this)">Todas</button>
+  <button class="fbtn" onclick="fd('hid',this)">Hidráulica</button>
+  <button class="fbtn" onclick="fd('ele',this)">Elétrica</button>
+  <button class="fbtn" onclick="fd('hvac',this)">HVAC</button>
+  <button class="fbtn" onclick="fd('str',this)">Estrutura</button>
+  <div class="vsep"></div>
+  <span class="fl">Criticidade</span>
+  <button class="fbtn on" onclick="fc('all',this)">Todas</button>
+  <button class="fbtn" onclick="fc('alta',this)">Alta</button>
+  <button class="fbtn" onclick="fc('media',this)">Média</button>
+  <button class="fbtn" onclick="fc('baixa',this)">Baixa</button>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi" style="--kc:#00d4aa"><div class="kpi-lbl">Total de Clashes</div><div class="kpi-val">847</div><div class="kpi-sub">Período completo</div></div>
+  <div class="kpi" style="--kc:#e74c3c"><div class="kpi-lbl">Clashes Ativos</div><div class="kpi-val">143</div><div class="kpi-sub"><span class="dn">▲ 12 vs mês ant.</span></div></div>
+  <div class="kpi" style="--kc:#2ecc71"><div class="kpi-lbl">Resolvidos</div><div class="kpi-val">704</div><div class="kpi-sub"><span class="up">83,1% do total</span></div></div>
+  <div class="kpi" style="--kc:#f39c12"><div class="kpi-lbl">Críticos Abertos</div><div class="kpi-val">38</div><div class="kpi-sub"><span class="dn">26,6% dos ativos</span></div></div>
+  <div class="kpi" style="--kc:#3498db"><div class="kpi-lbl">Tempo Médio Res.</div><div class="kpi-val">11d</div><div class="kpi-sub"><span class="up">▼ 3d abaixo da meta</span></div></div>
+  <div class="kpi" style="--kc:#9b59b6"><div class="kpi-lbl">SLA Atendido</div><div class="kpi-val">78%</div><div class="kpi-sub"><span class="dn">Meta: 85%</span></div></div>
+  <div class="kpi" style="--kc:#e67e22"><div class="kpi-lbl">Retrabalho</div><div class="kpi-val">19%</div><div class="kpi-sub">161 clashes</div></div>
+  <div class="kpi" style="--kc:#1abc9c"><div class="kpi-lbl">Eficiência Coord.</div><div class="kpi-val">71%</div><div class="kpi-sub">Score composto</div></div>
+</div>
+
+<div class="sdiv">Evolução Temporal & Distribuição</div>
+
+<!-- Row 1: timeline full width -->
+<div class="grid1">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Volume Mensal de Clashes</div><div class="cs">Identificados vs Resolvidos vs Backlog acumulado · Jan–Jun 2024</div></div><span class="badge b-teal">6 meses</span></div>
+    <div class="cb">
+      <div style="position:relative;width:100%;height:230px;"><canvas id="cTimeline" role="img" aria-label="Evolução mensal de clashes"></canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:11px;color:var(--text2);">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:#e74c3c;display:inline-block;border-radius:2px"></span>Identificados</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:#00d4aa;display:inline-block;border-radius:2px"></span>Resolvidos</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:#f39c12;display:inline-block;border-radius:2px;border-top:2px dashed #f39c12"></span>Backlog Ativo</span>
+      </div>
+    </div>
+    <div class="ci"><b>Insight:</b> Pico de identificação em Março (198 clashes), coincidindo com entrega do modelo LOD 350 de HVAC. Curva de resolução acelerou a partir de Abril, reduzindo o backlog em 34% nas últimas 8 semanas.</div>
+  </div>
+</div>
+
+<!-- Row 2: disciplinas + status -->
+<div class="grid2">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Clashes por Disciplina</div><div class="cs">Total identificado no período</div></div></div>
+    <div class="cb" id="discBars"></div>
+    <div class="ci"><b>Insight:</b> <b>Hidráulica × HVAC</b> representa 41% dos clashes críticos. Reunião de coordenação semanal entre responsáveis recomendada.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">Pipeline de Status</div><div class="cs">Distribuição atual</div></div></div>
+    <div class="cb">
+      <div class="sg">
+        <div class="si"><div class="sn" style="color:#e74c3c">89</div><div class="sl">Aberto</div></div>
+        <div class="si"><div class="sn" style="color:#f39c12">38</div><div class="sl">Em Análise</div></div>
+        <div class="si"><div class="sn" style="color:#3498db">29</div><div class="sl">Em Revisão</div></div>
+        <div class="si"><div class="sn" style="color:#9b59b6">18</div><div class="sl">Ag. Retorno</div></div>
+        <div class="si"><div class="sn" style="color:#2ecc71">558</div><div class="sl">Resolvido</div></div>
+        <div class="si"><div class="sn" style="color:#00d4aa">115</div><div class="sl">Validado</div></div>
+      </div>
+      <div style="position:relative;width:100%;height:150px;margin-top:14px;"><canvas id="cDonut" role="img" aria-label="Status dos clashes"></canvas></div>
+    </div>
+    <div class="ci"><b>Insight:</b> 62,9% validados — acima da média do setor. <b>18 itens aguardam retorno</b> há mais de 7 dias: risco de SLA.</div>
+  </div>
+</div>
+
+<div class="sdiv">Matriz de Interferências & Performance</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Matriz de Interferências</div><div class="cs">Volume de clashes entre pares de disciplinas</div></div></div>
+    <div class="cb mtx-wrap"><table class="mtx" id="matTbl"></table></div>
+    <div class="ci"><b>Insight:</b> <b>Hidráulica × HVAC</b> (94) e <b>Elétrica × Estrutura</b> (71) são os maiores gargalos. Revisão do espaço técnico pavimentos 8–14 é prioritária.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">Tempo Médio de Resolução</div><div class="cs">Por disciplina · dias úteis vs meta (12d)</div></div></div>
+    <div class="cb"><div style="position:relative;width:100%;height:240px;"><canvas id="cSLA" role="img" aria-label="Tempo médio de resolução por disciplina"></canvas></div></div>
+    <div class="ci"><b>Insight:</b> <b>HVAC</b> tem maior tempo médio (17 dias) — 41% acima da meta. Automação e Incêndio dentro do SLA.</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Aging de Clashes Ativos</div><div class="cs">Distribuição por tempo em aberto</div></div></div>
+    <div class="cb" id="agingBars"></div>
+    <div class="ci"><b>Insight:</b> <b>31 clashes estão há mais de 21 dias sem resolução</b> — risco direto a prazo. Escalamento ao coordenador-chefe recomendado.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">Top Categorias de Problema</div><div class="cs">Pareto das causas raiz</div></div></div>
+    <div class="cb" id="paretoList"></div>
+    <div class="ci"><b>Insight:</b> As <b>3 principais categorias</b> respondem por 68% de todos os clashes. Foco nestas eliminaria 2/3 do volume.</div>
+  </div>
+</div>
+
+<div class="sdiv">Distribuição por Pavimento & Tipo de Clash</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Clashes por Pavimento</div><div class="cs">Concentração de interferências · Torre A</div></div></div>
+    <div class="cb"><div style="position:relative;width:100%;height:270px;"><canvas id="cFloor" role="img" aria-label="Clashes por pavimento"></canvas></div></div>
+    <div class="ci"><b>Insight:</b> Pavimentos <b>8–12</b> concentram 43% dos clashes — zona de shafts técnicos e passagem de dutos principais.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">Tipo de Clash</div><div class="cs">Classificação por natureza</div></div></div>
+    <div class="cb">
+      <div style="position:relative;width:100%;height:160px;"><canvas id="cType" role="img" aria-label="Tipos de clash"></canvas></div>
+      <div style="margin-top:14px;">
+        <div class="brow"><span class="blbl" style="font-size:11px">Hard Clash</span><span style="font-size:11px;color:var(--text2);flex:1">Colisão física direta</span><span class="badge b-red">Alta criticidade</span></div>
+        <div class="brow"><span class="blbl" style="font-size:11px">Soft Clash</span><span style="font-size:11px;color:var(--text2);flex:1">Sobreposição de tolerância</span><span class="badge b-amber">Média criticidade</span></div>
+        <div class="brow"><span class="blbl" style="font-size:11px">Clearance</span><span style="font-size:11px;color:var(--text2);flex:1">Espaço de manutenção</span><span class="badge b-blue">Média criticidade</span></div>
+        <div class="brow"><span class="blbl" style="font-size:11px">Workflow</span><span style="font-size:11px;color:var(--text2);flex:1">Sequência executiva</span><span class="badge b-green">Baixa criticidade</span></div>
+      </div>
+    </div>
+    <div class="ci"><b>Insight:</b> <b>Hard clashes</b> = 38% do total mas 71% do impacto estimado em custo. Prioridade máxima.</div>
+  </div>
+</div>
+
+<div class="sdiv">Burn-Down de Clashes</div>
+
+<div class="grid1">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Burn-Down — Backlog Planejado vs Realizado</div><div class="cs">Evolução do backlog ao longo do projeto</div></div><span class="badge b-green">Adiantado 8%</span></div>
+    <div class="cb">
+      <div style="position:relative;width:100%;height:190px;"><canvas id="cBurn" role="img" aria-label="Burn-down planejado vs realizado"></canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:11px;color:var(--text2);">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:#3498db;display:inline-block;border-radius:2px"></span>Planejado</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:#00d4aa;display:inline-block;border-radius:2px"></span>Realizado</span>
+      </div>
+    </div>
+    <div class="ci"><b>Insight:</b> Backlog realizado <b>8% abaixo do planejado</b> — equipe adiantada. Risco de reaceleração se modelos de interiores e fachada não forem entregues conforme cronograma.</div>
+  </div>
+</div>
+
+<footer>
+  <span>BIM Analytics · Clash Detection Dashboard · Projeto Residencial Alto Padrão · São Paulo · 2024</span>
+  <span>Dados fictícios para fins educacionais e de portfólio · Gerado em 24/05/2025</span>
+</footer>
+
+<script>
+const discData=[
+  {n:"Hidráulica",v:198,c:"#3498db"},{n:"Elétrica",v:167,c:"#f39c12"},
+  {n:"HVAC",v:154,c:"#9b59b6"},{n:"Estrutura",v:132,c:"#e74c3c"},
+  {n:"Incêndio",v:89,c:"#e67e22"},{n:"Arquitetura",v:62,c:"#1abc9c"},
+  {n:"Automação",v:29,c:"#2ecc71"},{n:"Fachada",v:16,c:"#00d4aa"},
+];
+const db=document.getElementById("discBars");
+discData.forEach(d=>{
+  const p=Math.round(d.v/198*100);
+  db.innerHTML+=`<div class="brow"><span class="blbl">${d.n}</span><div class="btrack"><div class="bfill" style="width:${p}%;background:${d.c}"></div></div><span class="bval">${d.v}</span></div>`;
+});
+
+const agD=[{l:"0–3 dias",v:42,c:"#2ecc71"},{l:"4–7 dias",v:38,c:"#00d4aa"},{l:"8–14 dias",v:32,c:"#f39c12"},{l:"15–21 dias",v:19,c:"#e67e22"},{l:"> 21 dias",v:12,c:"#e74c3c"}];
+const ab=document.getElementById("agingBars");
+agD.forEach(a=>{ab.innerHTML+=`<div class="ar"><span class="al">${a.l}</span><div class="atr"><div class="af" style="width:${Math.round(a.v/42*100)}%;background:${a.c}"></div></div><span class="an">${a.v}</span></div>`;});
+
+const pD=[{n:"Interferência Hid.×HVAC",p:22},{n:"Colisão com Estrutura",p:18},{n:"Shaft técnico insuficiente",p:14},{n:"Clearance de manutenção",p:11},{n:"Rota de dutos conflitante",p:9},{n:"Elétrica em laje",p:7},{n:"Outros",p:19}];
+const pl=document.getElementById("paretoList");
+pD.forEach((p,i)=>{pl.innerHTML+=`<div class="pr"><span class="prk">${String(i+1).padStart(2,"0")}</span><span class="prn">${p.n}</span><div class="prt"><div class="prf" style="width:${Math.round(p.p/22*100)}%"></div></div><span class="prp">${p.p}%</span></div>`;});
+
+const discs=["Arq","Est","Hid","Ele","HVAC","Inc","Aut"];
+const mat=[[0,18,32,14,11,6,3],[18,0,41,71,38,19,8],[32,41,0,94,58,22,11],[14,71,94,0,47,31,14],[11,38,58,47,0,28,9],[6,19,22,31,28,0,5],[3,8,11,14,9,5,0]];
+function hc(v){return v===0?"h0":v<15?"h1":v<30?"h2":v<50?"h3":v<80?"h4":"h5";}
+let mh=`<tr><th></th>${discs.map(d=>`<th>${d}</th>`).join("")}</tr>`;
+mat.forEach((row,i)=>{mh+=`<tr><th>${discs[i]}</th>${row.map(v=>`<td class="${hc(v)}">${v||"—"}</td>`).join("")}</tr>`;});
+document.getElementById("matTbl").innerHTML=mh;
+
+const mo=["Jan","Fev","Mar","Abr","Mai","Jun"];
+new Chart(document.getElementById("cTimeline"),{type:"line",data:{labels:mo,datasets:[
+  {label:"Identificados",data:[112,134,198,167,143,93],borderColor:"#e74c3c",backgroundColor:"rgba(231,76,60,.07)",tension:.4,fill:true,pointRadius:5,pointBackgroundColor:"#e74c3c",borderWidth:2.5},
+  {label:"Resolvidos",data:[78,99,151,189,161,126],borderColor:"#00d4aa",backgroundColor:"rgba(0,212,170,.07)",tension:.4,fill:true,pointRadius:5,pointBackgroundColor:"#00d4aa",borderWidth:2.5},
+  {label:"Backlog",data:[112,147,194,172,154,121],borderColor:"#f39c12",backgroundColor:"transparent",tension:.4,borderDash:[7,4],pointRadius:4,pointBackgroundColor:"#f39c12",borderWidth:1.5},
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}},scales:{x:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:11}}},y:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:11}}}}}});
+
+new Chart(document.getElementById("cDonut"),{type:"doughnut",data:{labels:["Aberto","Em Análise","Em Revisão","Ag. Retorno","Resolvido","Validado"],datasets:[{data:[89,38,29,18,558,115],backgroundColor:["#e74c3c","#f39c12","#3498db","#9b59b6","#2ecc71","#00d4aa"],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:"72%",plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}}}});
+
+new Chart(document.getElementById("cSLA"),{type:"bar",data:{labels:["HVAC","Estrutura","Hidráulica","Elétrica","Incêndio","Automação"],datasets:[{label:"Dias",data:[17,15,13,11,9,7],backgroundColor:["#e74c3c","#e74c3c","#f39c12","#00d4aa","#2ecc71","#2ecc71"],borderRadius:4,borderWidth:0},{label:"Meta",data:[12,12,12,12,12,12],type:"line",borderColor:"#f39c12",borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:"y",plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}},scales:{x:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:10}},max:20},y:{grid:{display:false},ticks:{color:"#8a9ab5",font:{size:11}}}}}});
+
+new Chart(document.getElementById("cFloor"),{type:"bar",data:{labels:["SS2","SS1","Tér","1º","2º","3º","4º","5º","6º","7º","8º","9º","10º","11º","12º","Cob"],datasets:[{label:"Clashes",data:[12,18,24,19,21,23,25,28,32,38,47,52,41,39,37,11],backgroundColor:[12,18,24,19,21,23,25,28,32,38,47,52,41,39,37,11].map(v=>v>=40?"#e74c3c":v>=25?"#f39c12":"#3498db"),borderRadius:3,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}},scales:{x:{grid:{display:false},ticks:{color:"#4a566a",font:{size:9},maxRotation:0}},y:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:10}}}}}});
+
+new Chart(document.getElementById("cType"),{type:"bar",data:{labels:["Hard Clash","Soft Clash","Clearance","Workflow"],datasets:[{data:[322,241,189,95],backgroundColor:["#e74c3c","#f39c12","#3498db","#2ecc71"],borderRadius:5,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}},scales:{x:{grid:{display:false},ticks:{color:"#4a566a",font:{size:10}}},y:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:10}}}}}});
+
+new Chart(document.getElementById("cBurn"),{type:"line",data:{labels:["Início","Jan","Fev","Mar","Abr","Mai","Jun"],datasets:[{label:"Planejado",data:[847,720,590,460,320,180,50],borderColor:"#3498db",backgroundColor:"rgba(52,152,219,.06)",tension:.3,fill:true,pointRadius:4,pointBackgroundColor:"#3498db",borderWidth:2,borderDash:[6,3]},{label:"Realizado",data:[847,710,562,401,284,143,null],borderColor:"#00d4aa",backgroundColor:"rgba(0,212,170,.08)",tension:.3,fill:true,pointRadius:4,pointBackgroundColor:"#00d4aa",borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e232b",titleColor:"#f0f4f8",bodyColor:"#8a9ab5",borderColor:"#1e2530",borderWidth:1}},scales:{x:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:11}}},y:{grid:{color:"rgba(255,255,255,.04)"},ticks:{color:"#4a566a",font:{size:11}}}}}});
+
+function fp(f,btn){document.querySelectorAll(".filters .fbtn").forEach(b=>{if(["Tudo","6 Meses","3 Meses","1 Mês"].includes(b.textContent.trim()))b.classList.remove("on")});btn.classList.add("on");}
+function fd(f,btn){document.querySelectorAll(".filters .fbtn").forEach(b=>{if(["Todas","Hidráulica","Elétrica","HVAC","Estrutura"].includes(b.textContent.trim()))b.classList.remove("on")});btn.classList.add("on");}
+function fc(f,btn){document.querySelectorAll(".filters .fbtn").forEach(b=>{if(["Todas","Alta","Média","Baixa"].includes(b.textContent.trim()))b.classList.remove("on")});btn.classList.add("on");}
+</script>
+</body>
+</html>
