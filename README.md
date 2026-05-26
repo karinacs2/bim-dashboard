@@ -48,7 +48,7 @@ The dashboard includes visual components such as:
 
 ### Main Dashboard Interface
 
-![Dashboard Preview](images/dashboard_preview.png)
+![Dashboard Preview](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
 
 ---
 
