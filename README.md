@@ -11,8 +11,8 @@
 ## Overview
 
 Clash detection in BIM coordination generates large volumes of data that
-typically remain locked in static Navisworks reports or unstructured
-spreadsheets — invisible to project managers and hard to act on.
+typically remain locked in static Navisworks or Solibri reports or unstructured
+spreadsheets, invisible to project managers and hard to act on.
 
 This dashboard transforms clash report data into structured, interactive
 visualizations, enabling coordination teams to monitor resolution
@@ -106,9 +106,3 @@ bim-project-dashboard/
 **Karina Costa**
 BIM Coordinator · Digital Construction · Data Analytics
 [LinkedIn](https://linkedin.com/in/seu-perfil) · [GitHub](https://github.com/karinacs2)
-
----
-
-*Fictitious data modelled for educational and portfolio purposes.*
-*Built to demonstrate BIM analytics concepts and dashboard development
-skills within the AEC industry.*
