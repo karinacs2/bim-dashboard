@@ -1,72 +1,114 @@
 # BIM Clash Detection Dashboard
 
-## Project Overview
+> Interactive analytics dashboard for BIM coordination workflows, 
+> tracking clash resolution, discipline interference, SLA performance,
+> and backlog burn-down across AEC project phases.
 
-This project presents a BIM-focused dashboard developed to explore data visualization and project analytics concepts within the Architecture, Engineering and Construction (AEC) industry.
-
-The dashboard was created using web technologies to simulate BIM project monitoring workflows, KPI tracking and visual project management interfaces.
-
-The project combines BIM concepts with data visualization and dashboard development principles.
+🔗 **Live Demo:** https://karinacs2.github.io/bim-project-dashboard/
 
 ---
 
-## Objectives
+## Overview
 
-- Explore BIM-related dashboard concepts
-- Visualize project KPIs and metrics
-- Simulate construction/project management analytics
-- Develop interactive dashboard interfaces
-- Apply front-end technologies to BIM workflows
-- Improve data communication and visualization skills
+Clash detection in BIM coordination generates large volumes of data that
+typically remain locked in static Navisworks reports or unstructured
+spreadsheets — invisible to project managers and hard to act on.
+
+This dashboard transforms clash report data into structured, interactive
+visualizations, enabling coordination teams to monitor resolution
+progress, identify bottlenecks by discipline, and track SLA compliance
+in real time.
+
+Built as a portfolio project simulating a real high-end residential
+development (Torre A + B · São Paulo · 2024), using fictitious data
+modelled after actual AEC coordination workflows.
 
 ---
 
-## Technologies Used
+## Key Metrics Tracked
 
-- HTML5
-- CSS3
-- JavaScript
-- Data Visualization Concepts
-- BIM Workflow Concepts
+| KPI | Value (sample dataset) |
+|---|---|
+| Total Clashes Identified | 847 |
+| Resolution Rate | 83.1% |
+| Critical Open Clashes | 38 |
+| Average Resolution Time | 11 days |
+| SLA Compliance | 78% (target: 85%) |
+| Rework Rate | 19% |
+| Coordination Efficiency Score | 71% |
 
 ---
 
 ## Features
 
-The dashboard includes visual components such as:
-
-- KPI cards
-- Project performance indicators
-- Progress tracking visuals
-- Construction/BIM analytics concepts
-- Interactive dashboard layout
-- Data visualization elements
-
----
-
-## Dashboard Preview
-
-### Main Dashboard Interface
-
-![Dashboard Preview](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
+- **Monthly clash volume** — identified vs resolved vs active backlog
+- **Discipline breakdown** — Hydraulics, Electrical, HVAC, Structure
+- **Interference matrix** — clash volume between all discipline pairs
+- **Resolution pipeline** — open → in analysis → in review → resolved → validated
+- **Aging analysis** — clashes by days open, flagging SLA risk
+- **Floor-level distribution** — concentration map by building level
+- **Clash type classification** — Hard Clash / Soft Clash / Clearance / Workflow
+- **Burn-down chart** — planned vs actual backlog reduction
+- **Root cause Pareto** — top categories driving 68% of all clashes
+- **Average resolution time by discipline** — vs 12-day target
 
 ---
 
-## Live Demo
+## Technologies
 
-### GitHub Pages
+| Layer | Stack |
+|---|---|
+| Structure | HTML5 |
+| Styling | CSS3 |
+| Logic & Charts | JavaScript |
+| Hosting | GitHub Pages |
+| Domain | BIM Coordination / AEC Analytics |
 
-🔗 https://karinacs2.github.io/bim-dashboard/
+---
+
+## Project Context
+
+This project was designed to bridge two areas:
+
+**BIM Coordination** — clash management, discipline coordination,
+ISO 19650-aligned workflows, CDE processes.
+
+**Data Analytics** — KPI design, visual communication, dashboard
+architecture, performance monitoring.
+
+It reflects the kind of data layer that BIM coordinators work with
+daily but rarely get to visualize in a structured, accessible way.
 
 ---
 
 ## Repository Structure
 
 ```text
-bim-dashboard/
+bim-project-dashboard/
 │
-├── index.html
-├── style.css
-├── script.js
-├── images/
+├── index.html          # Main dashboard layout
+├── style.css           # Styling and responsive design
+├── script.js           # Chart logic and interactivity
+├── BIM Dashboard.png   # Dashboard preview image
 └── README.md
+```
+
+---
+
+## Dashboard Preview
+
+![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
+
+---
+
+## Author
+
+**Karina Costa**
+BIM Coordinator · Digital Construction · Data Analytics
+[LinkedIn](https://linkedin.com/in/seu-perfil) · [GitHub](https://github.com/karinacs2)
+
+---
+
+*Fictitious data modelled for educational and portfolio purposes.*
+*Built to demonstrate BIM analytics concepts and dashboard development
+skills within the AEC industry.*
