@@ -1,4 +1,4 @@
-# BIM Dashboard
+# BIM Clash Detection Dashboard
 
 ## Project Overview
 
