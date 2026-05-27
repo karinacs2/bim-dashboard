@@ -19,10 +19,6 @@ visualizations, enabling coordination teams to monitor resolution
 progress, identify bottlenecks by discipline, and track SLA compliance
 in real time.
 
-Built as a portfolio project simulating a real high-end residential
-development (Torre A + B · São Paulo · 2024), using fictitious data
-modelled after actual AEC coordination workflows.
-
 ---
 
 ## Key Metrics Tracked
@@ -100,9 +96,3 @@ bim-project-dashboard/
 ![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
 
 ---
-
-## Author
-
-**Karina Costa**
-BIM Coordinator · Digital Construction · Data Analytics
-[LinkedIn](https://linkedin.com/in/seu-perfil) · [GitHub](https://github.com/karinacs2)
