@@ -8,6 +8,12 @@
 
 ---
 
+## Dashboard Preview
+
+![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
+
+---
+
 ## Overview
 
 Clash detection in BIM coordination generates large volumes of data that
@@ -89,10 +95,3 @@ bim-project-dashboard/
 └── README.md
 ```
 
----
-
-## Dashboard Preview
-
-![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
-
----
