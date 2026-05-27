@@ -1,16 +1,10 @@
 # BIM Clash Detection Dashboard
 
-> Interactive analytics dashboard for BIM coordination workflows, 
+> Dashboard for BIM coordination workflows, 
 > tracking clash resolution, discipline interference, SLA performance,
 > and backlog burn-down across AEC project phases.
 
 🔗 **Live Demo:** https://karinacs2.github.io/bim-project-dashboard/
-
----
-
-## Dashboard Preview
-
-![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
 
 ---
 
@@ -24,6 +18,12 @@ This dashboard transforms clash report data into structured, interactive
 visualizations, enabling coordination teams to monitor resolution
 progress, identify bottlenecks by discipline, and track SLA compliance
 in real time.
+
+---
+
+## Dashboard Preview
+
+![BIM Clash Detection Dashboard](https://github.com/karinacs2/bim-project-dashboard/blob/main/BIM%20Dashboard.png)
 
 ---
 
